@@ -19,6 +19,7 @@ namespace TicTacToeAI {
                 Console.WriteLine("3) Entrenar red neuronal");
                 Console.WriteLine("4) Competir entre AIs");
                 Console.WriteLine("5) Competir IA vs Random");
+                Console.WriteLine("6) Jugar 4 en linea");
                 Console.WriteLine("?) Salir");
 
                 int option = Int32.Parse(Console.ReadLine());
@@ -39,6 +40,9 @@ namespace TicTacToeAI {
                         break;
                     case 5:
                         AIPlayWithRandom();
+                        break;
+                    case 6:
+                        PlayConnectFour();
                         break;
                     default:
                         Environment.Exit(0);
@@ -296,6 +300,12 @@ namespace TicTacToeAI {
             /*double[] results = AI.ComputeOutputs(ttt.GetBoardParameters());
             int playIndex = Cerebrum.ResultIndex(results);
             return ttt.PlayOn(playIndex / 3, playIndex % 3, false);*/
+        }
+
+        static public void PlayConnectFour()
+        {
+            ConnectFour connectFour = new ConnectFour();
+            connectFour.PrintBoard();
         }
     }
 }
