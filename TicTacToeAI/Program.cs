@@ -306,6 +306,26 @@ namespace TicTacToeAI {
         {
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
+            bool playing = true;
+            int column = 0, turn;
+            bool invalidColumn = true;
+            while (playing)
+            {
+                turn = connectFour.turn;
+                Console.WriteLine(turn == -1 ? "Le toca jugar al jugador 1 ('R')" : "Le toca jugar al jugador 2 ('Y')");
+                do
+                {
+                    invalidColumn = true;
+                    do
+                    {
+                        Console.Write("Ingrese la columna: ");
+                        column = int.Parse(Console.ReadLine());
+                        if (column >= 1 && column <= 7)
+                            invalidColumn = false;
+                    } while (invalidColumn);
+                } while (!connectFour.PlayOn(column-1));
+                connectFour.PrintBoard();
+            }
         }
     }
 }
