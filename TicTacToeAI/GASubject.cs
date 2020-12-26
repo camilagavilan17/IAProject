@@ -13,7 +13,7 @@ namespace TicTacToeAI {
 
         public GASubject() {
             Name = Namer++;
-            AI = new Cerebellum(10, 9, 1, false);
+            AI = new Cerebellum(43, 42, 1, false);
             Fitness = 0;
         }
 

@@ -10,13 +10,12 @@ namespace TicTacToeAI
         public int[,] board;
         public int turn;
         public int width = 7, height = 6;
+        public int lastMovement;
 
         public ConnectFour()
         {
             board = new int[height, width];
             turn = -1; //-1 red 1 yellow
-            board[5,5]=1;
-
         }
 
         public bool PlayOn(int column)
@@ -26,6 +25,7 @@ namespace TicTacToeAI
                 board[FindRow(column), column] = turn;
                 turn *= -1;
                 Console.WriteLine("Jugada valida");
+                lastMovement = column;
                 return true;
             }
             else
@@ -223,6 +223,8 @@ namespace TicTacToeAI
                 boardRepresentation = "";
             }
         }
+
+        /*
         public int PossibleNextStepsIA(int j)
         {
             String pos ="POS: ";
@@ -237,14 +239,15 @@ namespace TicTacToeAI
                 }
             }
             return 5;
-        }
+        }*/
+
         public List<ConnectFour> GetPossibleBoards() {
             List<ConnectFour> boards = new List<ConnectFour>();
 
             for (int j = 0; j < width; j++) {
                 ConnectFour connectFourNew = this.CloneConnectFour();
-                connectFourNew.PlayOn(PossibleNextStepsIA(j), j);
-                connectFourNew.PrintBoard();
+                connectFourNew.PlayOn(j);
+                //connectFourNew.PrintBoard();
                 boards.Add(connectFourNew);
             }
             return boards;
@@ -257,8 +260,16 @@ namespace TicTacToeAI
             return conecta;
         }
 
-        public void PlayOn(int i, int j){
-            this.board[i,j] = -1;
+        public double[] GetBoardParameters()
+        {
+            //NOTE: Index 0-42 are positions in the board. Index 43 is current player
+            return new double[43] { board[0,0], board[0,1], board[0,2], board[0,3], board[0,4], board[0,5], board[0,6],
+                                    board[1,0], board[1,1], board[1,2], board[1,3], board[1,4], board[1,5], board[1,6],
+                                    board[2,0], board[2,1], board[2,2], board[2,3], board[2,4], board[2,5], board[2,6],
+                                    board[3,0], board[3,1], board[3,2], board[3,3], board[3,4], board[3,5], board[3,6],
+                                    board[4,0], board[4,1], board[4,2], board[4,3], board[4,4], board[4,5], board[4,6],
+                                    board[5,0], board[5,1], board[5,2], board[5,3], board[5,4], board[5,5], board[5,6],
+                                    turn};
         }
 
     }

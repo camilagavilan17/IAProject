@@ -147,15 +147,15 @@ namespace TicTacToeAI {
 
         public void Compete(GASubject subject) {
             Random r = new Random();
-            TicTacToe ttt;
+            ConnectFour connectFour;
 
             int playedGames = 0;
             int turn;
-            bool playing = true;
+            bool playing;
             int games = 1000;
 
             while (games > 0) {
-                ttt = new TicTacToe();
+                connectFour = new ConnectFour();
                 turn = games / 501;
                 playing = true;
                 //Console.WriteLine("Game: "+ (10-games));
@@ -163,18 +163,18 @@ namespace TicTacToeAI {
 
                 while (playing) {
                     if (turn == 0) {
-                        while (!ttt.PlayOn(r.Next(0, 3), r.Next(0, 3), false)) { }
+                        while (!connectFour.PlayOn(r.Next(0, connectFour.width))) { }
                     }
                     else {
-                        if (!PlayMove(subject, ttt)) {
+                        if (!PlayMove(subject, connectFour)) {
                             //NOTE: Loses when doing an invalid movement
                             subject.Fitness--;
                             playedGames++;
                             break;
                         }
                     }
-                    if (ttt.State() != TicTacToe.BoardState.PLAYING) {
-                        if (ttt.State() != TicTacToe.BoardState.TIE) {
+                    if (connectFour.GetState() != ConnectFour.BoardState.PLAYING) {
+                        if (connectFour.GetState() != ConnectFour.BoardState.TIE) {
                             if (turn == 1) {
                                 subject.Fitness++;
                             }
@@ -188,21 +188,21 @@ namespace TicTacToeAI {
             }
         }
 
-        public bool PlayMove(GASubject subject, TicTacToe ttt) {
+        public bool PlayMove(GASubject subject, ConnectFour connectFour) {
             //INFO: Compute, try to play, if invalid then play random
             /*double[] results = subject.AI.ComputeOutputs(ttt.GetBoardParameters());
             int playIndex = Cerebrum.ResultIndex(results);
             return ttt.PlayOn(playIndex / 3, playIndex % 3, false);*/
             double bestValue = double.MinValue;
-            TicTacToe bestBoard = null;
-            foreach (TicTacToe board in ttt.GetPossibleBoards()) {
+            ConnectFour bestBoard = null;
+            foreach (ConnectFour board in connectFour.GetPossibleBoards()) {
                 double boardValue = subject.AI.ComputeOutputs(board.GetBoardParameters())[0];
                 if (boardValue > bestValue) {
                     bestValue = boardValue;
                     bestBoard = board;
                 }
             }
-            return ttt.PlayOn(bestBoard.rowLastMovement, bestBoard.columnLastMovement, false);
+            return connectFour.PlayOn(bestBoard.lastMovement);
         }
     }
 } 

@@ -17,9 +17,8 @@ namespace TicTacToeAI {
                 Console.WriteLine("1) Jugar contra Random");
                 Console.WriteLine("2) Jugar contra IA");
                 Console.WriteLine("3) Entrenar red neuronal");
-                Console.WriteLine("4) Competir entre AIs");
-                Console.WriteLine("5) Competir IA vs Random");
-                Console.WriteLine("6) Jugar 4 en linea");
+                Console.WriteLine("4) Competir IA vs Random");
+                Console.WriteLine("5) Jugar 4 en linea");
                 Console.WriteLine("?) Salir");
 
                 int option = Int32.Parse(Console.ReadLine());
@@ -36,12 +35,9 @@ namespace TicTacToeAI {
                         //ParallelTrainAI();
                         break;
                     case 4:
-                        AIBrawl();
-                        break;
-                    case 5:
                         AIPlayWithRandom();
                         break;
-                    case 6:
+                    case 5:
                         PlayConnectFour();
                         break;
                     default:
@@ -52,80 +48,103 @@ namespace TicTacToeAI {
         }
 
         static public void PlayWithRandom() {
-            TicTacToe ttt = new TicTacToe();
-            ttt.PrintBoard();
-
-            while (true) {
-                int i, j;
-                do {
-                    Console.Write("Ingrese fila: ");
-                    i = int.Parse(Console.ReadLine());
-                    Console.Write("Ingrese columna: ");
-                    j = int.Parse(Console.ReadLine());
-                } while (!ttt.PlayOn(i, j));
-                if (ttt.State() != TicTacToe.BoardState.PLAYING)
-                    break;
-                while (!ttt.PlayOn(r.Next(0, 3), r.Next(0, 3))) { };
-                if (ttt.State() != TicTacToe.BoardState.PLAYING)
-                    break;
+            ConnectFour connectFour = new ConnectFour();
+            connectFour.PrintBoard();
+            int firstPlayer = r.Next(0, 2);
+            int column, turn = firstPlayer == 0 ? -1 : 1;
+            bool invalidColumn;
+            while (true)
+            {
+                Console.WriteLine(turn == -1 ? "Le toca jugar al jugador " : "Le toca jugar al random ");
+                if(turn == -1)
+                {
+                    do
+                    {
+                        invalidColumn = true;
+                        do
+                        {
+                            Console.Write("Ingrese la columna: ");
+                            column = int.Parse(Console.ReadLine());
+                            if (column >= 1 && column <= 7)
+                                invalidColumn = false;
+                        } while (invalidColumn);
+                    } while (!connectFour.PlayOn(column - 1));
+                }
+                else
+                    while (!connectFour.PlayOn(r.Next(0, connectFour.width))) { }
+                connectFour.PrintBoard();
+                Console.WriteLine("Estado tablero: " + connectFour.GetState());
+                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING)
+                {
+                    if (connectFour.GetState() == ConnectFour.BoardState.WIN_RED)
+                        Console.WriteLine("Red wins!!!!");
+                    else if (connectFour.GetState() == ConnectFour.BoardState.WIN_YELLOW)
+                        Console.WriteLine("Yellow wins!!!!");
+                    else if (connectFour.GetState() == ConnectFour.BoardState.TIE)
+                        Console.WriteLine("Empate! nadie gano :C");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+                turn = connectFour.turn;
             }
-            if (ttt.State() == TicTacToe.BoardState.WIN_CIRCLE)
-                Console.WriteLine("Gano O");
-            else if (ttt.State() == TicTacToe.BoardState.WIN_CROSS)
-                Console.WriteLine("Gano X");
-            else
-                Console.WriteLine("Empate");
+
         }
 
         static public void PlayWithAI() {
-            TicTacToe ttt = new TicTacToe();
-            ttt.PrintBoard();
+            ConnectFour connectFour = new ConnectFour();
+            connectFour.PrintBoard();
 
             Console.WriteLine("Binary file for AI1 (Empty for random): ");
             string fileIA1 = Console.ReadLine();
 
-            Cerebellum AI = null;
-            if (fileIA1 == string.Empty) {
+            Cerebellum AI;
+            if (int.Parse(fileIA1) == -1) {
                 Console.WriteLine("Generated random AI agent");
-                AI = new Cerebellum(10, 9, 1, false);
+                AI = new Cerebellum(43, 42, 1, false);
                 AI.Randomize();
             }
             else {
                 AI = LoadAI(fileIA1);
             }
-            
-            while (true) {
-                int i, j;
-                do {
-                    Console.Write("Ingrese fila: ");
-                    i = int.Parse(Console.ReadLine());
-                    Console.Write("Ingrese columna: ");
-                    j = int.Parse(Console.ReadLine());
-                } while (!ttt.PlayOn(i, j));
-                if (ttt.State() != TicTacToe.BoardState.PLAYING)
-                    break;
 
-                //INFO: Compute, try to play, if invalid then play random
-                double[] results = AI.ComputeOutputs(ttt.GetBoardParameters());
-                Cerebrum.PrintResult(results); //TODO: Remove
-                int playIndex = Cerebrum.ResultIndex(results);
-                Console.WriteLine("Index selected: "+playIndex);
-                Console.WriteLine("Play values will be: {0}, {1}", playIndex / 3, playIndex % 3);
-                if (!ttt.PlayOn(playIndex/3, playIndex%3)) {
-                    Console.WriteLine("AI invalid move. Playing random");
-                    while (!ttt.PlayOn(r.Next(0, 3), r.Next(0, 3))) { };
+            int firstPlayer = r.Next(0, 2);
+            int column, turn = firstPlayer == 0 ? -1 : 1;
+            bool invalidColumn;
+            while (true)
+            {
+                Console.WriteLine(turn == -1 ? "Le toca jugar al jugador" : "Le toca jugar a la IA");
+                if (turn == -1)
+                {
+                    do
+                    {
+                        invalidColumn = true;
+                        do
+                        {
+                            Console.Write("Ingrese la columna: ");
+                            column = int.Parse(Console.ReadLine());
+                            if (column >= 1 && column <= 7)
+                                invalidColumn = false;
+                        } while (invalidColumn);
+                    } while (!connectFour.PlayOn(column - 1));
                 }
-
-                if(ttt.State() != TicTacToe.BoardState.PLAYING)
-                    break;
+                else
+                    PlayMove(AI, connectFour);
+                connectFour.PrintBoard();
+                Console.WriteLine("Estado tablero: " + connectFour.GetState());
+                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING)
+                {
+                    if (connectFour.GetState() == ConnectFour.BoardState.WIN_RED)
+                        Console.WriteLine("Red wins!!!!");
+                    else if (connectFour.GetState() == ConnectFour.BoardState.WIN_YELLOW)
+                        Console.WriteLine("Yellow wins!!!!");
+                    else if (connectFour.GetState() == ConnectFour.BoardState.TIE)
+                        Console.WriteLine("Empate! nadie gano :C");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }
+                turn = connectFour.turn;
             }
 
-            if (ttt.State() == TicTacToe.BoardState.WIN_CIRCLE)
-                Console.WriteLine("Gano O");
-            else if (ttt.State() == TicTacToe.BoardState.WIN_CROSS)
-                Console.WriteLine("Gano X");
-            else
-                Console.WriteLine("Empate");
         }
 
         static public void ConsolePrintWeights(double[] weights) {
@@ -183,89 +202,32 @@ namespace TicTacToeAI {
             formatter.Serialize(stream, AI);
             stream.Close();
         }
-               
-        static public void AIBrawl() {
-            Random r = new Random();
-
-            Console.WriteLine("Binary file for AI1: ");
-            string fileIA1 = Console.ReadLine();
-            Console.WriteLine("Binary file for AI2:");
-            string fileIA2 = Console.ReadLine();
-            Console.WriteLine("How many rounds?: ");
-            int rounds = int.Parse(Console.ReadLine());
-
-            Cerebellum AI1 = LoadAI(fileIA1);
-            Cerebellum AI2 = LoadAI(fileIA2);
-            int winsAI1 = 0;
-            int winsAI2 = 0;
-            int startingPlayer = 1;
-
-            for (int i = 0; i < rounds; i++) {
-                TicTacToe ttt = new TicTacToe();
-                int currentPlayer = startingPlayer;
-
-                while (true) {
-                    //INFO: Compute, try to play, if invalid then play random
-                    double[] results = (currentPlayer > 0 ? AI1 : AI2).ComputeOutputs(ttt.GetBoardParameters());
-                    int playIndex = Cerebrum.ResultIndex(results);
-                    if (!ttt.PlayOn(playIndex / 3, playIndex % 3, false)) {
-                        //NOTE: If invalid move, the other player wins
-                        if (currentPlayer > 0) {
-                            winsAI2++;
-                        }
-                        else {
-                            winsAI1++;
-                        }
-                        break;
-                    }
-
-                    if (ttt.State() != TicTacToe.BoardState.PLAYING) {
-                        if (ttt.State() != TicTacToe.BoardState.TIE) {
-                            if (currentPlayer == 1) {
-                                winsAI1++;
-                            }
-                            else {
-                                winsAI2++;
-                            }
-                        }
-                        break;
-                    }
-                    //INFO: Changes player turn
-                    currentPlayer *= -1;
-                }
-                //INFO: Changes starting player
-                startingPlayer *= -1;
-            }
-
-            Console.WriteLine("Wins AI1 : "+winsAI1);
-            Console.WriteLine("Wins AI2 : " + winsAI2);
-        }
-
+        
         static public void AIPlayWithRandom() {
             Console.Write("Ingrese el nombre del archivo: ");
             string name = Console.ReadLine();
             Cerebellum IA = LoadAI(name);
             Random r = new Random();
-            TicTacToe ttt;
+            ConnectFour connectFour;
             bool playing;
             int games = 10000, turn;
             int IAWins = 0, randomWins = 0, ties = 0, IAInvalidMovements = 0;
             while (games > 0) {
                 turn = games / 5001;
                 playing = true;
-                ttt = new TicTacToe();
+                connectFour = new ConnectFour();
                 while (playing) {
                     if (turn == 0) {
-                        while (!ttt.PlayOn(r.Next(0, 3), r.Next(0, 3), false)) { }
+                        while (!connectFour.PlayOn(r.Next(0, connectFour.width))) { }
                     }
                     else {
-                        if (!PlayMove(IA, ttt)) {
+                        if (!PlayMove(IA, connectFour)) {
                             playing = false;
                             IAInvalidMovements++;
                         }
                     }
-                    if (ttt.State() != TicTacToe.BoardState.PLAYING) {
-                        if (ttt.State() != TicTacToe.BoardState.TIE) {
+                    if (connectFour.GetState() != ConnectFour.BoardState.PLAYING) {
+                        if (connectFour.GetState() != ConnectFour.BoardState.TIE) {
                             if (turn == 1)
                                 IAWins++;
                             else
@@ -286,17 +248,17 @@ namespace TicTacToeAI {
             //Console.WriteLine($"En total se jugaron {IAWins + randomWins + IAInvalidMovements + ties} partidas");
         }
 
-        static public bool PlayMove(Cerebellum AI, TicTacToe ttt) {
+        static public bool PlayMove(Cerebellum AI, ConnectFour connectFour) {
             double bestValue = double.MinValue;
-            TicTacToe bestBoard = null;
-            foreach (TicTacToe board in ttt.GetPossibleBoards()) {
+            ConnectFour bestBoard = null;
+            foreach (ConnectFour board in connectFour.GetPossibleBoards()) {
                 double boardValue = AI.ComputeOutputs(board.GetBoardParameters())[0];
                 if (boardValue > bestValue) {
                     bestValue = boardValue;
                     bestBoard = board;
                 }
             }
-            return ttt.PlayOn(bestBoard.rowLastMovement, bestBoard.columnLastMovement, false);
+            return connectFour.PlayOn(bestBoard.lastMovement);
             /*double[] results = AI.ComputeOutputs(ttt.GetBoardParameters());
             int playIndex = Cerebrum.ResultIndex(results);
             return ttt.PlayOn(playIndex / 3, playIndex % 3, false);*/
@@ -327,6 +289,18 @@ namespace TicTacToeAI {
                 } while (!connectFour.PlayOn(column-1));
                 connectFour.PrintBoard();
                 Console.WriteLine("Estado tablero: "+connectFour.GetState());
+                //connectFour.GetPossibleBoards();
+                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING)
+                {
+                    if (connectFour.GetState() == ConnectFour.BoardState.WIN_RED)
+                        Console.WriteLine("Red wins!!!!");
+                    else if (connectFour.GetState() == ConnectFour.BoardState.WIN_YELLOW)
+                        Console.WriteLine("Yellow wins!!!!");
+                    else if (connectFour.GetState() == ConnectFour.BoardState.TIE)
+                        Console.WriteLine("Empate! nadie gano :C");
+                    Console.ReadLine();
+                    Environment.Exit(0);
+                }   
             }
         }
     }
