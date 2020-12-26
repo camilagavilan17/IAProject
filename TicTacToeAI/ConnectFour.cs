@@ -85,9 +85,12 @@ namespace TicTacToeAI
             String pos ="POS: ";
             for(int i=0; i<height; i++){
                 if(board[i, j] == 1 || board[i, j] == -1){
-                    if(board[i-1, j] != 1 || board[i-1, j] != -1){
-                        return i-1;
+                    if(i-1 >=0){
+                        if(board[i-1, j] != 1 || board[i-1, j] != -1){
+                            return i-1;
+                        } 
                     }
+                    
                 }
             }
             return 5;
