@@ -307,8 +307,8 @@ namespace TicTacToeAI {
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
             bool playing = true;
-            int column = 0, turn;
-            bool invalidColumn = true;
+            int column, turn;
+            bool invalidColumn;
             while (playing)
             {
                 turn = connectFour.turn;
@@ -325,6 +325,7 @@ namespace TicTacToeAI {
                     } while (invalidColumn);
                 } while (!connectFour.PlayOn(column-1));
                 connectFour.PrintBoard();
+                Console.WriteLine("Estado tablero: "+connectFour.GetState());
             }
         }
     }
