@@ -24,6 +24,7 @@ namespace Connect4 {
         public GASubject TopSubject = null;
         public int MaxFitness = Int32.MinValue;
         public string PreviousAI;
+        public bool CompeteWithAI = false;
         
 
         public GATrainer() { }
@@ -44,7 +45,10 @@ namespace Connect4 {
                 TopSubject = Population[0];
             }
             for (int i = 0; i < TRAINING_ITERATIONS; i++) {
-                Evaluate();
+                if (!CompeteWithAI)
+                    Evaluate();
+                else
+                    Evaluate2();
                 Rank();
                 Store();
                 Reproduce();
@@ -89,6 +93,55 @@ namespace Connect4 {
             for (int i = 0; i < subjects.Count; i++)
             {
                 Compete(subjects[i]);
+            }
+        }
+
+        public void Evaluate2()
+        {
+            for (int i = 0; i < Population.Count; i++)
+            {
+                for (int j = i; j < Population.Count; j++)
+                {
+                    Compete2(Population[i], Population[j]);
+                }
+            }
+        }
+
+        public void Compete2(GASubject subject, GASubject subject2)
+        {
+            ConnectFour connect4;
+            int games = 2, currentTurn = 0;
+            bool playing;
+            while (games > 0)
+            {
+                playing = true;
+                connect4 = new ConnectFour();
+                if (games == 1)
+                    connect4.turn = 1;
+                while (playing)
+                {
+                    if(connect4.turn == -1)
+                    {
+                        PlayMove(subject, connect4); //IA One plays
+                        currentTurn = -1;
+                    } 
+                    else if (connect4.turn == 1)
+                    {
+                        PlayMove(subject2, connect4); //IA Two plays
+                        currentTurn = 1;
+                    }
+                    if (connect4.GetState() != ConnectFour.BoardState.PLAYING && connect4.GetState() != ConnectFour.BoardState.TIE)
+                    {
+                        if (currentTurn == -1)
+                            subject.Fitness++;
+                        else if (currentTurn == 1)
+                            subject2.Fitness++;
+                        playing = false;
+                    }
+                    else if (connect4.GetState() == ConnectFour.BoardState.TIE)
+                        playing = false;
+                }
+                games--;
             }
         }
 

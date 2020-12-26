@@ -23,8 +23,9 @@ namespace Connect4 {
                 Console.WriteLine("Ingrese opción para modificar variables de mutación: ");
                 Console.WriteLine("1) Cambiar que tantos individuos son distintos"); //SUBJECT_MUTATION
                 Console.WriteLine("2) Cambiar que tan distintos son"); //GENOMA_MUTATION
-                Console.WriteLine("3) Mostrar datos de la generacion actual"); //GENOMA_MUTATION
-                Console.WriteLine("4) Salir");
+                Console.WriteLine("3) Mostrar datos de la generacion actual"); 
+                Console.WriteLine("4) Cambiar competicion x pelear entre AIs"); 
+                Console.WriteLine("5) Salir");
 
                 int option = Int32.Parse(Console.ReadLine());
 
@@ -39,11 +40,19 @@ namespace Connect4 {
                     case 3:
                         PrintCurrentGeneration();
                         break;
+                    case 4:
+                        ChangeCompeteMethod();
+                        break;
                     default:
                         Environment.Exit(0);
                         break;
                 }
             }
+        }
+
+        static public void ChangeCompeteMethod()
+        {
+            GATrainer.CompeteWithAI = true;
         }
 
         static public void PrintCurrentGeneration()
