@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 
-namespace TicTacToeAI {
+namespace Connect4 {
     class Program {
         static public GATrainer GATrainer;
         static public bool AILoadedFromFile = false;
@@ -98,7 +99,7 @@ namespace TicTacToeAI {
             string fileIA1 = Console.ReadLine();
 
             Cerebellum AI;
-            if (int.Parse(fileIA1) == -1) {
+            if (fileIA1 == "No") {
                 Console.WriteLine("Generated random AI agent");
                 AI = new Cerebellum(43, 42, 1, false);
                 AI.Randomize();
@@ -108,7 +109,7 @@ namespace TicTacToeAI {
             }
 
             int firstPlayer = r.Next(0, 2);
-            int column, turn = firstPlayer == 0 ? -1 : 1;
+            int column, turn = connectFour.turn;
             bool invalidColumn;
             while (true)
             {
@@ -198,7 +199,7 @@ namespace TicTacToeAI {
 
         static public void SaveAI(Cerebellum AI, string suffix = "") {
             IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(@"D:\AI\TicTacToe" + suffix + ".ai", FileMode.Create, FileAccess.Write);
+            Stream stream = new FileStream(@"D:\AI\ConnectFour" + suffix + ".ai", FileMode.Create, FileAccess.Write);
             formatter.Serialize(stream, AI);
             stream.Close();
         }
@@ -300,7 +301,20 @@ namespace TicTacToeAI {
                         Console.WriteLine("Empate! nadie gano :C");
                     Console.ReadLine();
                     Environment.Exit(0);
-                }   
+                }
+                /*
+                Console.Write("Obtener tableros posibles: ");
+                if (Console.ReadLine() == "si")
+                {
+                    List<ConnectFour> boards = new List<ConnectFour>();
+                    boards = connectFour.GetPossibleBoards();
+                    foreach (ConnectFour board in boards)
+                    {
+                        Console.WriteLine("Tablero: ");
+                        board.PrintBoard();
+                    }
+                    Console.WriteLine(boards.Count);
+                }*/      
             }
         }
     }

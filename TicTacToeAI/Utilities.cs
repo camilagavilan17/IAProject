@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TicTacToeAI {
+namespace Connect4 {
     static class Utilities {
         private static Random rng = new Random();
 

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TicTacToeAI {
+namespace Connect4 {
 
     [Serializable]
     class Cerebrum {

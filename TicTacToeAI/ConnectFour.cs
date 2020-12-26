@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TicTacToeAI
+namespace Connect4
 {
     class ConnectFour
     {
@@ -24,13 +24,13 @@ namespace TicTacToeAI
             {
                 board[FindRow(column), column] = turn;
                 turn *= -1;
-                Console.WriteLine("Jugada valida");
+                //Console.WriteLine("Jugada valida");
                 lastMovement = column;
                 return true;
             }
             else
             {
-                Console.WriteLine("Jugada invalida");
+                //Console.WriteLine("Jugada invalida");
                 return false;
             } 
         }
@@ -246,9 +246,8 @@ namespace TicTacToeAI
 
             for (int j = 0; j < width; j++) {
                 ConnectFour connectFourNew = this.CloneConnectFour();
-                connectFourNew.PlayOn(j);
-                //connectFourNew.PrintBoard();
-                boards.Add(connectFourNew);
+                if(connectFourNew.PlayOn(j))
+                    boards.Add(connectFourNew);
             }
             return boards;
         }

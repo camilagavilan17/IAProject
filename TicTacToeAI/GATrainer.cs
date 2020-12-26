@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TicTacToeAI {
+namespace Connect4 {
     class GATrainer {
         static public double SUBJECT_MUTATION_CHANCE = 0.1;
         static public double GENOMA_MUTATION_CHANCE = 0.05;
