@@ -306,6 +306,7 @@ namespace TicTacToeAI {
         {
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
+
             bool playing = true;
             int column, turn;
             bool invalidColumn;
