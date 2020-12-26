@@ -306,6 +306,10 @@ namespace TicTacToeAI {
         {
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
+            connectFour.GetPossibleBoards();
+            //for(int i=0; lista.size; i++){
+              //  lista.get(i).PrintBoard();
+            //}
         }
     }
 }
