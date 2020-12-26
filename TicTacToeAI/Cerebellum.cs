@@ -56,8 +56,8 @@ namespace Connect4 {
         public void Randomize() {
             int numWeights = (NumInputs * HiddenPerceptrons) + HiddenPerceptrons + (HiddenPerceptrons * NumOutputs) + NumOutputs;
             double[] weights = new double[numWeights];
-            double lo = -0.01;
-            double hi = 0.01;
+            double lo = -0.5;
+            double hi = 0.5;
             for (int i = 0; i < weights.Length; ++i)
                 weights[i] = (hi - lo) * Rand.NextDouble() + lo;
             this.SetWeights(weights);
@@ -181,6 +181,62 @@ namespace Connect4 {
                 }
             }
             return pivot;
+        }
+
+        public void Mutate()
+        {
+            double genomeMutationRate = GATrainer.GENOMA_MUTATION_CHANCE;
+            double[] genome = this.GetWeights();
+            for (int i = 0; i < genome.Length; i++)
+            {
+                if (Rand.NextDouble() <= genomeMutationRate)
+                {
+                    int position = Rand.Next(0, genome.Length);
+                    genome[position] = (Rand.NextDouble() * 2) - 1;
+                }
+            }
+            this.SetWeights(genome);
+        }
+
+        public GASubject[] Crossover(GASubject partner)
+        {
+            GASubject[] childs = new GASubject[2];
+
+            double[] genomeA = this.GetWeights();
+            double[] genomeB = partner.GetGenome();
+            int genomeLenght = genomeA.Length;
+
+            double[] childA = new double[genomeLenght];
+            double[] childB = new double[genomeLenght];
+
+            int partitionA = Rand.Next(0, genomeLenght - 1);
+            int partitionB = Rand.Next(partitionA + 1, genomeLenght);
+
+            //NOTE: Changed for two-point crossover
+            for (int i = 0; i < partitionA; i++)
+            {
+                childA[i] = genomeA[i];
+                childB[i] = genomeB[i];
+            }
+            for (int j = partitionA; j < partitionB; j++)
+            {
+                childA[j] = genomeB[j];
+                childB[j] = genomeA[j];
+            }
+            for (int k = partitionB; k < genomeLenght; k++)
+            {
+                childA[k] = genomeA[k];
+                childB[k] = genomeB[k];
+            }
+
+            GASubject traineeA = new GASubject();
+            traineeA.SetGenome(childA);
+            GASubject traineeB = new GASubject();
+            traineeB.SetGenome(childB);
+            childs[0] = traineeA;
+            childs[1] = traineeB;
+
+            return childs;
         }
     }
 }

@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Connect4 {
     class GATrainer {
-        static public double SUBJECT_MUTATION_CHANCE = 0.1;
-        static public double GENOMA_MUTATION_CHANCE = 0.05;
+        static public double SUBJECT_MUTATION_CHANCE = 0.5;
+        static public double GENOMA_MUTATION_CHANCE = 0.5;
         static public int INITIAL_POPULATION = 100;
         static public int TRAINING_ITERATIONS = int.MaxValue;
         static public int AI_BACKUP_GENERATIONS = 250;
-        static public int THREADS_QUANTITY = 4;
+        static public int THREADS_QUANTITY = 5;
         static public bool ELITIST_MODE = true;
         static public int TOP_QUANTITY_KEEP = 10;
 
@@ -20,12 +23,12 @@ namespace Connect4 {
         public List<GASubject> Population;
         public GASubject TopSubject = null;
         public int MaxFitness = Int32.MinValue;
+        public string PreviousAI;
         
 
         public GATrainer() { }
 
         public void Populate() {
-            Console.WriteLine("Populating generation #"+Generation);
             Population = new List<GASubject>();
 
             for (int i = 0; i < GATrainer.INITIAL_POPULATION; i++) {
@@ -36,6 +39,8 @@ namespace Connect4 {
         public void Train() {
             if (Population == null) {
                 this.Populate();
+                if(!String.IsNullOrEmpty(PreviousAI))
+                    TryToLoadPreviousAI();
                 TopSubject = Population[0];
             }
             for (int i = 0; i < TRAINING_ITERATIONS; i++) {
@@ -44,6 +49,14 @@ namespace Connect4 {
                 Store();
                 Reproduce();
             }
+        }
+
+        public void TryToLoadPreviousAI()
+        {
+            IFormatter formatter = new BinaryFormatter();
+            Stream stream = new FileStream(@"D:\AI\" + PreviousAI, FileMode.Open, FileAccess.Read);
+            Cerebellum cerebellum = (Cerebellum)formatter.Deserialize(stream);
+            Population[0].AI = cerebellum;
         }
 
         private void Evaluate()
@@ -63,7 +76,6 @@ namespace Connect4 {
                 threads[i] = new Thread(() => EvaluateRange(Population.GetRange(start,portion)));
                 threads[i].Start();
             }
-
             //Joins all the tasks
             for (int i = 0; i < THREADS_QUANTITY; i++) {
                 threads[i].Join();
@@ -101,13 +113,12 @@ namespace Connect4 {
 
         public void Reproduce() {
             Generation++;
-            Console.WriteLine("Reproducing generation #"+Generation);
             Random r = new Random();
             List<GASubject> nextPopulation = new List<GASubject>();
 
             for (int i = 0; i < TOP_QUANTITY_KEEP; i++) {
                 for (int j = i+1; j < TOP_QUANTITY_KEEP; j++) {
-                    nextPopulation.AddRange(Population[i].Crossover(Population[j]));
+                    nextPopulation.AddRange(Population[i].AI.Crossover(Population[j]));
                 }
             }
 
@@ -125,7 +136,7 @@ namespace Connect4 {
             //NOTE: Moved this to introduce mutation on parents as well
             if (GATrainer.ELITIST_MODE) {
                 //NOTE: Adds the 99 best of the previous generation  (resets fitness)
-                for (int i = 0; i < TOP_QUANTITY_KEEP; i++) {
+                for (int i = 0; i < TOP_QUANTITY_KEEP-1; i++) {
                     GASubject elder = Population[i].Clone();
                     elder.Fitness = 0;
                     nextPopulation.Add(elder);
@@ -135,54 +146,69 @@ namespace Connect4 {
             double mutationChance = GATrainer.SUBJECT_MUTATION_CHANCE; 
             foreach (GASubject st in nextPopulation) {
                 if (r.NextDouble() <= mutationChance) {
-                    st.Mutate();
+                    st.AI.Mutate();
                 }
             }
             
             //NOTE: Includes top subject always //Need to put -1 to include elders
-            //nextPopulation.Add(TopSubject.Clone());
+            nextPopulation.Add(TopSubject.Clone());
+            nextPopulation.Last().Fitness = 0;
  
             Population = nextPopulation;
         }
 
-        public void Compete(GASubject subject) {
+        public void Compete(GASubject subject)
+        {
             Random r = new Random();
             ConnectFour connectFour;
-
-            int playedGames = 0;
-            int turn;
-            bool playing;
             int games = 1000;
-
-            while (games > 0) {
-                connectFour = new ConnectFour();
-                turn = games / 501;
+            bool playing;
+            int gamesplayed = 0, AIGamesPlayed = 0, RandomGamesPlayed = 0;
+            int ties = 0, winAI = 0, winRandom = 0;
+            int currentTurn = 0;
+            while (games > 0)
+            {
                 playing = true;
-                //Console.WriteLine("Game: "+ (10-games));
-                //Console.WriteLine("Starts player: "+turn);
+                connectFour = new ConnectFour();
+                if (games > 500)
+                    connectFour.turn = 1;
+                if (connectFour.turn == -1)
+                    RandomGamesPlayed++;
+                else if (connectFour.turn == 1)
+                    AIGamesPlayed++;
+                while (playing)
+                {
+                    if (connectFour.turn == -1)
+                    {
+                        while (!connectFour.PlayOn(r.Next(0, connectFour.width))) { } //Random plays
+                        currentTurn = -1;
+                    }
+                    else if (connectFour.turn == 1)
+                    {
+                        PlayMove(subject, connectFour); //IA plays
+                        currentTurn = 1;
+                    }
+                    if (connectFour.GetState() != ConnectFour.BoardState.PLAYING && connectFour.GetState() != ConnectFour.BoardState.TIE)
+                    {
+                        if (currentTurn == 1)
+                        {
+                            subject.Fitness++;
+                            winAI++;
+                        }
+                        else if (currentTurn == -1)
+                        {
+                            winRandom++;
+                        }
+                        playing = false;
+                        gamesplayed++;
+                    }
+                    else if (connectFour.GetState() == ConnectFour.BoardState.TIE)
+                    {
+                        playing = false;
+                        ties++;
+                        gamesplayed++;
+                    }
 
-                while (playing) {
-                    if (turn == 0) {
-                        while (!connectFour.PlayOn(r.Next(0, connectFour.width))) { }
-                    }
-                    else {
-                        if (!PlayMove(subject, connectFour)) {
-                            //NOTE: Loses when doing an invalid movement
-                            subject.Fitness--;
-                            playedGames++;
-                            break;
-                        }
-                    }
-                    if (connectFour.GetState() != ConnectFour.BoardState.PLAYING) {
-                        if (connectFour.GetState() != ConnectFour.BoardState.TIE) {
-                            if (turn == 1) {
-                                subject.Fitness++;
-                            }
-                        }
-                        playedGames++;
-                        break;
-                    }
-                    turn = (turn == 0 ? 1 : 0);
                 }
                 games--;
             }
@@ -204,5 +230,6 @@ namespace Connect4 {
             }
             return connectFour.PlayOn(bestBoard.lastMovement);
         }
+
     }
 } 

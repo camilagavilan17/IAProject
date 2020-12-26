@@ -201,26 +201,34 @@ namespace Connect4
 
         public void PrintBoard()
         {
-            string boardRepresentation = "";
+            //string boardRepresentation = "";
             Console.WriteLine(" 1   2   3   4   5   6   7   ");
             for (int row = 0; row < height; row++)
             {
                 for (int column = 0; column < width; column++)
                 {
                     if (board[row, column] == -1)
-                        boardRepresentation += " R ";
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.Write(" ■ ");
+                        Console.ResetColor();
+                    }
                     else if (board[row, column] == 1)
-                        boardRepresentation += " Y ";
+                    {
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write(" ■ ");
+                        Console.ResetColor();
+                    }
                     else
-                        boardRepresentation += "   ";
+                        Console.Write("   ");
                     if (column != width - 1)
-                        boardRepresentation += "|";
+                        Console.Write("|");
                 }
-                boardRepresentation += "\n";
+                Console.Write("\n");
                 if (row != height - 1)
-                    boardRepresentation += "---------------------------";
-                Console.WriteLine(boardRepresentation);
-                boardRepresentation = "";
+                    Console.WriteLine("---------------------------");
+                //Console.WriteLine(boardRepresentation);
+                //boardRepresentation = "";
             }
         }
 

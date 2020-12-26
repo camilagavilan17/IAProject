@@ -13,18 +13,74 @@ namespace Connect4 {
         
 
         static void Main(string[] args) {
-            while (1 == 1) {
+            FirstMenu();   
+        }
+
+        static public void SecondMenu()
+        {
+            while (1 == 1)
+            {
+                Console.WriteLine("Ingrese opción para modificar variables de mutación: ");
+                Console.WriteLine("1) Cambiar que tantos individuos son distintos"); //SUBJECT_MUTATION
+                Console.WriteLine("2) Cambiar que tan distintos son"); //GENOMA_MUTATION
+                Console.WriteLine("3) Mostrar datos de la generacion actual"); //GENOMA_MUTATION
+                Console.WriteLine("4) Salir");
+
+                int option = Int32.Parse(Console.ReadLine());
+
+                switch (option)
+                {
+                    case 1:
+                        ChangeSubjectMutation();
+                        break;
+                    case 2:
+                        ChangeGenomaMutation();
+                        break;
+                    case 3:
+                        PrintCurrentGeneration();
+                        break;
+                    default:
+                        Environment.Exit(0);
+                        break;
+                }
+            }
+        }
+
+        static public void PrintCurrentGeneration()
+        {
+            Console.WriteLine("Reproducing generation #"+ GATrainer.Generation);
+            Console.WriteLine("Genoma mutation : "+ GATrainer.GENOMA_MUTATION_CHANCE);
+            Console.WriteLine("Subject mutation : " + GATrainer.SUBJECT_MUTATION_CHANCE);
+        }
+
+        static public void ChangeSubjectMutation()
+        {
+            Console.WriteLine("Ingrese el valor: ");
+            GATrainer.GENOMA_MUTATION_CHANCE = double.Parse(Console.ReadLine());
+        }
+
+        static public void ChangeGenomaMutation()
+        {
+            Console.WriteLine("Ingrese el valor: ");
+            GATrainer.SUBJECT_MUTATION_CHANCE = double.Parse(Console.ReadLine());
+        }
+
+        static public void FirstMenu()
+        {
+            while (1 == 1)
+            {
                 Console.WriteLine("Ingrese opción: ");
                 Console.WriteLine("1) Jugar contra Random");
                 Console.WriteLine("2) Jugar contra IA");
                 Console.WriteLine("3) Entrenar red neuronal");
                 Console.WriteLine("4) Competir IA vs Random");
                 Console.WriteLine("5) Jugar 4 en linea");
-                Console.WriteLine("?) Salir");
+                Console.WriteLine("6) Salir");
 
                 int option = Int32.Parse(Console.ReadLine());
 
-                switch (option) {
+                switch (option)
+                {
                     case 1:
                         PlayWithRandom();
                         break;
@@ -33,7 +89,6 @@ namespace Connect4 {
                         break;
                     case 3:
                         TrainAI();
-                        //ParallelTrainAI();
                         break;
                     case 4:
                         AIPlayWithRandom();
@@ -52,7 +107,7 @@ namespace Connect4 {
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
             int firstPlayer = r.Next(0, 2);
-            int column, turn = firstPlayer == 0 ? -1 : 1;
+            int column, turn = connectFour.turn;
             bool invalidColumn;
             while (true)
             {
@@ -169,8 +224,16 @@ namespace Connect4 {
             if (GATrainer == null) {
                 GATrainer = new GATrainer();
             }
-
+            Console.WriteLine("Quiere cargar una AI en la poblacion inicial?");
+            if (Console.ReadLine() == "si")
+            {
+                Console.WriteLine("Ingrese el nombre del archivo: ");
+                GATrainer.PreviousAI = Console.ReadLine();
+            }
+            Thread thread = new Thread(() => SecondMenu());
+            thread.Start();
             GATrainer.Train();
+            thread.Join();
         }
 
         static public void ParallelTrainAI() {
@@ -267,6 +330,7 @@ namespace Connect4 {
 
         static public void PlayConnectFour()
         {
+            Console.WriteLine("White on blue.");
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
 
@@ -290,7 +354,6 @@ namespace Connect4 {
                 } while (!connectFour.PlayOn(column-1));
                 connectFour.PrintBoard();
                 Console.WriteLine("Estado tablero: "+connectFour.GetState());
-                //connectFour.GetPossibleBoards();
                 if (connectFour.GetState() != ConnectFour.BoardState.PLAYING)
                 {
                     if (connectFour.GetState() == ConnectFour.BoardState.WIN_RED)
