@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToeAI", "TicTacToeAI\TicTacToeAI.csproj", "{D111DBC3-0B19-4EF9-A3C0-98D4DB649152}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIProjectU3", "AIProjectU3\AIProjectU3.csproj", "{D111DBC3-0B19-4EF9-A3C0-98D4DB649152}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
