@@ -1,12 +1,11 @@
-﻿using NeuronDotNet.Core.Backpropagation;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace Connect4 {
-
+    /// <summary>
+    /// Represents a MLP neural network with one hidden layer
+    /// </summary>
     [Serializable]
-    class Cerebellum {
+    class NeuralNetwork {
         private int NumInputs;
         private int HiddenPerceptrons;
         private int NumOutputs;
@@ -27,7 +26,15 @@ namespace Connect4 {
 
         private static Random Rand;
 
-        public Cerebellum(int numInput, int numHiddenA, int numOutput, bool softmax = true) {
+        /// <summary>
+        /// MLP neural network basic implementation.
+        /// Reference of implementation: https://visualstudiomagazine.com/Articles/2014/06/01/Deep-Neural-Networks.aspx?Page=2
+        /// </summary>
+        /// <param name="numInput">Number of inputs</param>
+        /// <param name="numHiddenA">Number of perceptrons on hidden layer</param>
+        /// <param name="numOutput">Number of outputs</param>
+        /// <param name="softmax">Should softmax be applied. Used on multiple output NNs</param>
+        public NeuralNetwork(int numInput, int numHiddenA, int numOutput, bool softmax = true) {
             this.NumInputs = numInput;
             this.HiddenPerceptrons = numHiddenA;
             this.NumOutputs = numOutput;
@@ -46,6 +53,12 @@ namespace Connect4 {
             Outputs = new double[numOutput];
         }
 
+        /// <summary>
+        /// Setup all needed matrix for data storage
+        /// </summary>
+        /// <param name="rows"></param>
+        /// <param name="cols"></param>
+        /// <returns></returns>
         private static double[][] MakeMatrix(int rows, int cols) {
             double[][] result = new double[rows][];
             for (int r = 0; r < result.Length; ++r)
@@ -53,6 +66,9 @@ namespace Connect4 {
             return result;
         }
 
+        /// <summary>
+        /// Randomizes all weights for the current neural network
+        /// </summary>
         public void Randomize() {
             int numWeights = (NumInputs * HiddenPerceptrons) + HiddenPerceptrons + (HiddenPerceptrons * NumOutputs) + NumOutputs;
             double[] weights = new double[numWeights];
@@ -63,13 +79,21 @@ namespace Connect4 {
             this.SetWeights(weights);
         }
 
+        /// <summary>
+        /// Returns the current weights
+        /// </summary>
+        /// <returns></returns>
         public double[] GetWeights() {
             return Weights;
         }
 
+        /// <summary>
+        /// Sets weights of the neural network from the given array.
+        /// </summary>
+        /// <param name="weights">Weights array</param>
         public void SetWeights(double[] weights) {
             this.Weights = weights;
-            int numWeights = (NumInputs * HiddenPerceptrons) + HiddenPerceptrons + (HiddenPerceptrons* NumOutputs) + NumOutputs;
+            int numWeights = (NumInputs * HiddenPerceptrons) + HiddenPerceptrons + (HiddenPerceptrons * NumOutputs) + NumOutputs;
             if (weights.Length != numWeights)
                 throw new Exception("Bad weights length");
 
@@ -90,40 +114,45 @@ namespace Connect4 {
                 OutBiases[i] = weights[k++];
         }
 
+        /// <summary>
+        /// Calculates the output values for a given input data set
+        /// </summary>
+        /// <param name="xValues">Input values</param>
+        /// <returns>Array with the output values</returns>
         public double[] ComputeOutputs(double[] xValues) {
             double[] hidSums = new double[HiddenPerceptrons];
-            double[] outSums = new double[NumOutputs]; 
+            double[] outSums = new double[NumOutputs];
 
             //Copy values to inputs
             for (int i = 0; i < xValues.Length; ++i)
                 this.Inputs[i] = xValues[i];
 
             //Sum of (input>hidden) weights * inputs
-            for (int j = 0; j < HiddenPerceptrons; ++j) 
+            for (int j = 0; j < HiddenPerceptrons; ++j)
                 for (int i = 0; i < NumInputs; ++i)
-                    hidSums[j] += this.Inputs[i] * this.IntHidWeights[i][j]; 
+                    hidSums[j] += this.Inputs[i] * this.IntHidWeights[i][j];
 
             //Biases of hidden layer
-            for (int i = 0; i < HiddenPerceptrons; ++i) 
+            for (int i = 0; i < HiddenPerceptrons; ++i)
                 hidSums[i] += this.HidBiases[i];
 
             //Activation function
-            for (int i = 0; i < HiddenPerceptrons; ++i)   
+            for (int i = 0; i < HiddenPerceptrons; ++i)
                 this.HidOutputs[i] = HyperTanFunction(hidSums[i]);
 
             //Sum of (hidden>output) weights * inputs
-            for (int j = 0; j < NumOutputs; ++j)  
+            for (int j = 0; j < NumOutputs; ++j)
                 for (int i = 0; i < HiddenPerceptrons; ++i)
                     outSums[j] += HidOutputs[i] * HidOutWeights[i][j];
 
             //Biases of output layer
-            for (int i = 0; i < NumOutputs; ++i)  
+            for (int i = 0; i < NumOutputs; ++i)
                 outSums[i] += OutBiases[i];
 
             double[] softOut = null;
             if (UseSoftmax) {
                 //NOTE: Activation does all outputs at once
-                softOut = Softmax(outSums); 
+                softOut = Softmax(outSums);
             }
             else {
                 softOut = outSums;
@@ -131,18 +160,28 @@ namespace Connect4 {
             Array.Copy(softOut, Outputs, softOut.Length);
 
             //TODO: Define a GetOutputs method instead
-            double[] retResult = new double[NumOutputs]; 
+            double[] retResult = new double[NumOutputs];
             Array.Copy(this.Outputs, retResult, retResult.Length);
             return retResult;
         }
 
+        /// <summary>
+        /// Activation function used for the layers
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
         private static double HyperTanFunction(double x) {
             //NOTE: approximation is correct to 30 decimals
-            if (x < -20.0) return -1.0; 
+            if (x < -20.0) return -1.0;
             else if (x > 20.0) return 1.0;
             else return Math.Tanh(x);
         }
 
+        /// <summary>
+        /// Softmax algorithm for output normalization
+        /// </summary>
+        /// <param name="oSums"></param>
+        /// <returns></returns>
         private static double[] Softmax(double[] oSums) {
             //NOTE: determine max output sum
             //does all output nodes at once so scale 
@@ -161,9 +200,13 @@ namespace Connect4 {
                 result[i] = Math.Exp(oSums[i] - max) / scale;
 
             //NOTE: now scaled so that xi sum to 1.0
-            return result; 
+            return result;
         }
 
+        /// <summary>
+        /// Prints the output of the network in a readaeable maner
+        /// </summary>
+        /// <param name="result"></param>
         static public void PrintResult(double[] result) {
             foreach (double d in result) {
                 Console.Write("{0:N3} ", d);
@@ -171,26 +214,15 @@ namespace Connect4 {
             Console.Write("\n");
         }
 
-        static public int ResultIndex(double[] result) {
-            int pivot = -1;
-            double previous = -1;
-            for (int i = 0; i < result.Length; i++) {
-                if (result[i] > previous) {
-                    pivot = i;
-                    previous = result[i];
-                }
-            }
-            return pivot;
-        }
-
-        public void Mutate()
-        {
+        /// <summary>
+        /// Mutates the current NN instance with the GA trainer parameters
+        /// </summary>
+        public void Mutate() {
+            //TODO: Pass values as parameters
             double genomeMutationRate = GATrainer.GENOMA_MUTATION_CHANCE;
             double[] genome = this.GetWeights();
-            for (int i = 0; i < genome.Length; i++)
-            {
-                if (Rand.NextDouble() <= genomeMutationRate)
-                {
+            for (int i = 0; i < genome.Length; i++) {
+                if (Rand.NextDouble() <= genomeMutationRate) {
                     int position = Rand.Next(0, genome.Length);
                     genome[position] = (Rand.NextDouble() * 2) - 1;
                 }
@@ -198,8 +230,12 @@ namespace Connect4 {
             this.SetWeights(genome);
         }
 
-        public GASubject[] Crossover(GASubject partner)
-        {
+        /// <summary>
+        /// Executes two-point crossover with the current and the given NN.
+        /// </summary>
+        /// <param name="partner">Parner NN for the crossover</param>
+        /// <returns>Array containing two childs</returns>
+        public GASubject[] Crossover(GASubject partner) {
             GASubject[] childs = new GASubject[2];
 
             double[] genomeA = this.GetWeights();
@@ -213,18 +249,15 @@ namespace Connect4 {
             int partitionB = Rand.Next(partitionA + 1, genomeLenght);
 
             //NOTE: Changed for two-point crossover
-            for (int i = 0; i < partitionA; i++)
-            {
+            for (int i = 0; i < partitionA; i++) {
                 childA[i] = genomeA[i];
                 childB[i] = genomeB[i];
             }
-            for (int j = partitionA; j < partitionB; j++)
-            {
+            for (int j = partitionA; j < partitionB; j++) {
                 childA[j] = genomeB[j];
                 childB[j] = genomeA[j];
             }
-            for (int k = partitionB; k < genomeLenght; k++)
-            {
+            for (int k = partitionB; k < genomeLenght; k++) {
                 childA[k] = genomeA[k];
                 childB[k] = genomeB[k];
             }
