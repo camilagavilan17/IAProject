@@ -15,11 +15,11 @@ namespace Connect4 {
         /// <summary>
         /// Changes how many subjects mutate on a population
         /// </summary>
-        static public double SUBJECT_MUTATION_CHANCE = 0.5;
+        static public double SUBJECT_MUTATION_CHANCE = 0.75;
         /// <summary>
         /// Changes how much different are mutated subjects
         /// </summary>
-        static public double GENOMA_MUTATION_CHANCE = 0.5;
+        static public double GENOMA_MUTATION_CHANCE = 0.25;
         static public int INITIAL_POPULATION = 100;
         static public int TRAINING_ITERATIONS = int.MaxValue;
         static public int AI_BACKUP_GENERATIONS = 250;
@@ -189,7 +189,7 @@ namespace Connect4 {
         private void Store() {
             if (Population[0].Fitness > MaxFitness) {
                 TopSubject = Population[0];
-                Program.SaveAI(TopSubject.AI, "_" + DateTime.Now.ToString("MMddHHmm")
+                Program.SaveAI(TopSubject.AI, "_D" + DateTime.Now.ToString("MMddHHmm")
                     + "_I" + Thread.CurrentThread.ManagedThreadId + "_G" + Generation
                     + "_N" + TopSubject.Name + "_F" + TopSubject.Fitness);
                 MaxFitness = Population[0].Fitness;
@@ -246,45 +246,27 @@ namespace Connect4 {
             Random r = new Random();
             ConnectFour connectFour;
             int games = 1000;
-            bool playing;
-            int gamesplayed = 0, AIGamesPlayed = 0, RandomGamesPlayed = 0;
-            int ties = 0, winAI = 0, winRandom = 0;
             int currentTurn = 0;
-            while (games > 0) {
-                playing = true;
-                connectFour = new ConnectFour();
-                if (games > 500)
-                    connectFour.turn = 1;
-                if (connectFour.turn == -1)
-                    RandomGamesPlayed++;
-                else if (connectFour.turn == 1)
-                    AIGamesPlayed++;
-                while (playing) {
-                    if (connectFour.turn == -1) {
-                        while (!connectFour.PlayOn(r.Next(0, connectFour.width))) { } //Random plays
-                        currentTurn = -1;
-                    }
-                    else if (connectFour.turn == 1) {
-                        PlayMove(subject, connectFour); //IA plays
-                        currentTurn = 1;
-                    }
-                    if (connectFour.GetState() != ConnectFour.BoardState.PLAYING && connectFour.GetState() != ConnectFour.BoardState.TIE) {
-                        if (currentTurn == 1) {
-                            subject.Fitness++;
-                            winAI++;
-                        }
-                        else if (currentTurn == -1) {
-                            winRandom++;
-                        }
-                        playing = false;
-                        gamesplayed++;
-                    }
-                    else if (connectFour.GetState() == ConnectFour.BoardState.TIE) {
-                        playing = false;
-                        ties++;
-                        gamesplayed++;
-                    }
 
+            while (games > 0) {
+                currentTurn = games / 501;
+                connectFour = new ConnectFour();
+                while (1 == 1) {
+                    if (currentTurn == 0)
+                        while (!connectFour.PlayOn(r.Next(0, connectFour.width))) { }
+                    else
+                        PlayMove(subject, connectFour);
+
+                    if (connectFour.GetState() != ConnectFour.BoardState.PLAYING) {
+                        if (connectFour.GetState() != ConnectFour.BoardState.TIE) {
+                            if (currentTurn == 1)
+                                subject.Fitness++;
+                            else
+                                subject.Fitness--; //NOTE: Optional
+                        }
+                        break;
+                    }
+                    currentTurn = (currentTurn == 0 ? 1 : 0);
                 }
                 games--;
             }

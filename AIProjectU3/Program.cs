@@ -9,8 +9,7 @@ namespace Connect4 {
         static public GATrainer GATrainer;
         static public bool AILoadedFromFile = false;
         static public Random r = new Random();
-        static public string AISavePath = @"D:\AI\ConnectFour";
-
+        static public string AISavePath = @"D:\AI\";
 
         static void Main() {
             FirstMenu();
@@ -266,7 +265,7 @@ namespace Connect4 {
         /// <param name="suffix">Suffix for the save file</param>
         static public void SaveAI(NeuralNetwork AI, string suffix = "") {
             IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(AISavePath + suffix + ".ai", FileMode.Create, FileAccess.Write);
+            Stream stream = new FileStream(AISavePath + "ConnectFour" + suffix + ".ai", FileMode.Create, FileAccess.Write);
             formatter.Serialize(stream, AI);
             stream.Close();
         }
@@ -281,10 +280,10 @@ namespace Connect4 {
             Random r = new Random();
             ConnectFour connectFour;
             bool playing;
-            int games = 10000, turn;
+            int games = 1000, turn;
             int IAWins = 0, randomWins = 0, ties = 0, IAInvalidMovements = 0;
             while (games > 0) {
-                turn = games / 5001;
+                turn = games / 501;
                 playing = true;
                 connectFour = new ConnectFour();
                 while (playing) {

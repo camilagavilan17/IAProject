@@ -2,11 +2,20 @@
 using System.Collections.Generic;
 
 namespace Connect4 {
+
+    /// <summary>
+    /// Represents the game connect four or four in a line.
+    /// The goal state is to line up four tiles on a board made 
+    /// up of six rows and seven columns.
+    /// </summary>
     class ConnectFour {
         public enum BoardState { PLAYING, WIN_RED, WIN_YELLOW, TIE }
         public int[,] board;
         public int turn;
         public int width = 7, height = 6;
+        /// <summary>
+        /// This parameter is used to know what movement the AI wants to play by choosing a board.
+        /// </summary>
         public int lastMovement;
 
         public ConnectFour() {
@@ -14,6 +23,12 @@ namespace Connect4 {
             turn = -1; //-1 red 1 yellow
         }
 
+        /// <summary>
+        /// This is the method to play a tile in the board, choosing only the column.
+        /// </summary>
+        /// <param name="column">This is column chosen to play</param> 
+        /// <returns>True if the play could be made and 
+        /// False if the play could not be made</returns>
         public bool PlayOn(int column) {
             if (ValidMove(column)) {
                 board[FindRow(column), column] = turn;
@@ -28,6 +43,11 @@ namespace Connect4 {
             }
         }
 
+        /// <summary>
+        /// This is a method to find the available row to play taking like a reference the column to play
+        /// </summary>
+        /// <param name="column">This is the column where do you want to play</param>
+        /// <returns> The row if there is any available</returns>
         public int FindRow(int column) {
             int row;
             for (row = height - 1; row >= 0; row--) {
@@ -37,6 +57,12 @@ namespace Connect4 {
             return row;
         }
 
+        /// <summary>
+        /// This method is to check if it is possible to play in a column, 
+        /// that is, if there are still empty rows.
+        /// </summary>
+        /// <param name="column">This is the column where do you want to play</param>
+        /// <returns>True if the column is valid and False if is not</returns>
         public bool ValidMove(int column) {
             bool validMove = false;
             for (int row = height - 1; row >= 0; row--) {
@@ -46,6 +72,11 @@ namespace Connect4 {
             return validMove;
         }
 
+        /// <summary>
+        /// This method is used to determine what state the board is in, 
+        /// the states can be "in play", "red won or yellow won" and "tie".
+        /// </summary>
+        /// <returns>The board current state</returns>
         public BoardState GetState() {
             int row, row2;
             int column;
@@ -198,8 +229,12 @@ namespace Connect4 {
             }
         }
 
-        public void UnusedFunctionA() { }
-
+        /// <summary>
+        /// This method is to get all the possible boards from the position of this current board.
+        /// This method is use by the AI, the AI rates this boards and we choose the one with the 
+        /// best score as the one chosen by the AI.
+        /// </summary>
+        /// <returns> All the possible boards</returns>
         public List<ConnectFour> GetPossibleBoards() {
             List<ConnectFour> boards = new List<ConnectFour>();
 
@@ -218,6 +253,11 @@ namespace Connect4 {
             return conecta;
         }
 
+        /// <summary>
+        ///  This are the parameters that the AI receive of any board 
+        ///  because the AI only processes inputs in a number representation.
+        /// </summary>
+        /// <returns>Any position of the board + the current player turn</returns>
         public double[] GetBoardParameters() {
             //NOTE: Index 0-42 are positions in the board. Index 43 is current player
             return new double[43] { board[0,0], board[0,1], board[0,2], board[0,3], board[0,4], board[0,5], board[0,6],
