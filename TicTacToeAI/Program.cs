@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -9,26 +10,27 @@ namespace Connect4 {
         static public GATrainer GATrainer;
         static public bool AILoadedFromFile = false;
         static public Random r = new Random();
-        static public string AISavePath = @"D:\AI\";
+        
 
-        static void Main() {
-            FirstMenu();
+        static void Main(string[] args) {
+            FirstMenu();   
         }
 
-        /// <summary>
-        /// User menu that allows to change trainer options in runtime
-        /// </summary>
-        static public void SecondMenu() {
-            while (1 == 1) {
+        static public void SecondMenu()
+        {
+            while (1 == 1)
+            {
                 Console.WriteLine("Ingrese opción para modificar variables de mutación: ");
                 Console.WriteLine("1) Cambiar que tantos individuos son distintos"); //SUBJECT_MUTATION
                 Console.WriteLine("2) Cambiar que tan distintos son"); //GENOMA_MUTATION
-                Console.WriteLine("3) Mostrar datos de la generacion actual");
-                Console.WriteLine("4) Salir");
+                Console.WriteLine("3) Mostrar datos de la generacion actual"); 
+                Console.WriteLine("4) Cambiar competicion x pelear entre AIs"); 
+                Console.WriteLine("5) Salir");
 
                 int option = Int32.Parse(Console.ReadLine());
 
-                switch (option) {
+                switch (option)
+                {
                     case 1:
                         ChangeSubjectMutation();
                         break;
@@ -38,6 +40,9 @@ namespace Connect4 {
                     case 3:
                         PrintCurrentGeneration();
                         break;
+                    case 4:
+                        ChangeCompeteMethod();
+                        break;
                     default:
                         Environment.Exit(0);
                         break;
@@ -45,32 +50,34 @@ namespace Connect4 {
             }
         }
 
-        static public void ChangeCompeteMethod() {
+        static public void ChangeCompeteMethod()
+        {
             GATrainer.CompeteWithAI = true;
         }
 
-        static public void PrintCurrentGeneration() {
-            Console.WriteLine("Reproducing generation #" + GATrainer.Generation);
-            Console.WriteLine("Genoma mutation : " + GATrainer.GENOMA_MUTATION_CHANCE);
+        static public void PrintCurrentGeneration()
+        {
+            Console.WriteLine("Reproducing generation #"+ GATrainer.Generation);
+            Console.WriteLine("Genoma mutation : "+ GATrainer.GENOMA_MUTATION_CHANCE);
             Console.WriteLine("Subject mutation : " + GATrainer.SUBJECT_MUTATION_CHANCE);
         }
 
-        static public void ChangeSubjectMutation() {
+        static public void ChangeSubjectMutation()
+        {
             Console.WriteLine("Ingrese el valor: ");
             GATrainer.GENOMA_MUTATION_CHANCE = double.Parse(Console.ReadLine());
         }
 
-        static public void ChangeGenomaMutation() {
+        static public void ChangeGenomaMutation()
+        {
             Console.WriteLine("Ingrese el valor: ");
             GATrainer.SUBJECT_MUTATION_CHANCE = double.Parse(Console.ReadLine());
         }
 
-        /// <summary>
-        /// First menu of the application. Allows the user to navigate and run
-        /// the different features
-        /// </summary>
-        static public void FirstMenu() {
-            while (1 == 1) {
+        static public void FirstMenu()
+        {
+            while (1 == 1)
+            {
                 Console.WriteLine("Ingrese opción: ");
                 Console.WriteLine("1) Jugar contra Random");
                 Console.WriteLine("2) Jugar contra IA");
@@ -81,7 +88,8 @@ namespace Connect4 {
 
                 int option = Int32.Parse(Console.ReadLine());
 
-                switch (option) {
+                switch (option)
+                {
                     case 1:
                         PlayWithRandom();
                         break;
@@ -104,21 +112,22 @@ namespace Connect4 {
             }
         }
 
-        /// <summary>
-        /// Setups a match with the user and a random agent
-        /// </summary>
         static public void PlayWithRandom() {
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
             int firstPlayer = r.Next(0, 2);
             int column, turn = connectFour.turn;
             bool invalidColumn;
-            while (true) {
+            while (true)
+            {
                 Console.WriteLine(turn == -1 ? "Le toca jugar al jugador " : "Le toca jugar al random ");
-                if (turn == -1) {
-                    do {
+                if(turn == -1)
+                {
+                    do
+                    {
                         invalidColumn = true;
-                        do {
+                        do
+                        {
                             Console.Write("Ingrese la columna: ");
                             column = int.Parse(Console.ReadLine());
                             if (column >= 1 && column <= 7)
@@ -130,7 +139,8 @@ namespace Connect4 {
                     while (!connectFour.PlayOn(r.Next(0, connectFour.width))) { }
                 connectFour.PrintBoard();
                 Console.WriteLine("Estado tablero: " + connectFour.GetState());
-                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING) {
+                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING)
+                {
                     if (connectFour.GetState() == ConnectFour.BoardState.WIN_RED)
                         Console.WriteLine("Red wins!!!!");
                     else if (connectFour.GetState() == ConnectFour.BoardState.WIN_YELLOW)
@@ -145,10 +155,6 @@ namespace Connect4 {
 
         }
 
-        /// <summary>
-        /// Setups a match with the user and an AI agent.
-        /// User must provide the name of the IA
-        /// </summary>
         static public void PlayWithAI() {
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
@@ -156,10 +162,10 @@ namespace Connect4 {
             Console.WriteLine("Binary file for AI1 (Empty for random): ");
             string fileIA1 = Console.ReadLine();
 
-            NeuralNetwork AI;
+            Cerebellum AI;
             if (fileIA1 == "No") {
                 Console.WriteLine("Generated random AI agent");
-                AI = new NeuralNetwork(43, 42, 1, false);
+                AI = new Cerebellum(43, 42, 1, false);
                 AI.Randomize();
             }
             else {
@@ -169,12 +175,16 @@ namespace Connect4 {
             int firstPlayer = r.Next(0, 2);
             int column, turn = connectFour.turn;
             bool invalidColumn;
-            while (true) {
+            while (true)
+            {
                 Console.WriteLine(turn == -1 ? "Le toca jugar al jugador" : "Le toca jugar a la IA");
-                if (turn == -1) {
-                    do {
+                if (turn == -1)
+                {
+                    do
+                    {
                         invalidColumn = true;
-                        do {
+                        do
+                        {
                             Console.Write("Ingrese la columna: ");
                             column = int.Parse(Console.ReadLine());
                             if (column >= 1 && column <= 7)
@@ -186,7 +196,8 @@ namespace Connect4 {
                     PlayMove(AI, connectFour);
                 connectFour.PrintBoard();
                 Console.WriteLine("Estado tablero: " + connectFour.GetState());
-                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING) {
+                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING)
+                {
                     if (connectFour.GetState() == ConnectFour.BoardState.WIN_RED)
                         Console.WriteLine("Red wins!!!!");
                     else if (connectFour.GetState() == ConnectFour.BoardState.WIN_YELLOW)
@@ -201,10 +212,6 @@ namespace Connect4 {
 
         }
 
-        /// <summary>
-        /// Utility to print the weights of an IA
-        /// </summary>
-        /// <param name="weights"></param>
         static public void ConsolePrintWeights(double[] weights) {
             int i = 1;
             foreach (double d in weights) {
@@ -221,69 +228,65 @@ namespace Connect4 {
             Console.Write("\n");
         }
 
-        /// <summary>
-        /// Starts the training of an AI. Values must be configured in the GATrainer class
-        /// </summary>
         static public void TrainAI() {
             //TODO: Include all previous AI into initial generation
             if (GATrainer == null) {
                 GATrainer = new GATrainer();
             }
-            Console.WriteLine("Ingrese el nombre del archivo para cargar AI: ");
-            GATrainer.PreviousAI = Console.ReadLine();
-            Console.WriteLine("Cambiar a competición entre AIs?: ");
+            Console.WriteLine("Quiere cargar una AI en la poblacion inicial?");
             if (Console.ReadLine() == "si")
-                ChangeCompeteMethod();
+            {
+                Console.WriteLine("Ingrese el nombre del archivo: ");
+                GATrainer.PreviousAI = Console.ReadLine();
+            }
             Thread thread = new Thread(() => SecondMenu());
             thread.Start();
             GATrainer.Train();
             thread.Join();
         }
 
-        /// <summary>
-        /// Loads an AI from a serialized filed. Path must me configured to avoid errors.
-        /// </summary>
-        /// <param name="name">Name of the IA file</param>
-        /// <returns></returns>
-        static public NeuralNetwork LoadAI(string name = "") {
+        static public void ParallelTrainAI() {
+            //INFO: Suitable for finding an initial solution
+            int threads = 8;
+            for (int i = 0; i < threads; i++) {
+                new Thread(() =>
+                {
+                    Console.WriteLine("Started training of AI #" + i);
+                    GATrainer trainer = new GATrainer();
+                    trainer.Train();
+                }).Start();
+            }
+        }
+
+        static public Cerebellum LoadAI(string name = "") {
             try {
                 IFormatter formatter = new BinaryFormatter();
-                Stream stream = new FileStream(AISavePath + name, FileMode.Open, FileAccess.Read);
-                return (NeuralNetwork)formatter.Deserialize(stream);
+                Stream stream = new FileStream(@"D:\AI\"+name, FileMode.Open, FileAccess.Read);
+                return (Cerebellum) formatter.Deserialize(stream);
             }
             catch (Exception e) {
-                Console.WriteLine("Error cargando la IA especificada. Revise el nombre y la ruta");
-                Console.WriteLine(e.Message);
                 return null;
             }
         }
 
-        /// <summary>
-        /// Saves an IA to the configured path using the given suffix
-        /// </summary>
-        /// <param name="AI">IA object</param>
-        /// <param name="suffix">Suffix for the save file</param>
-        static public void SaveAI(NeuralNetwork AI, string suffix = "") {
+        static public void SaveAI(Cerebellum AI, string suffix = "") {
             IFormatter formatter = new BinaryFormatter();
-            Stream stream = new FileStream(AISavePath + "ConnectFour" + suffix + ".ai", FileMode.Create, FileAccess.Write);
+            Stream stream = new FileStream(@"D:\AI\ConnectFour" + suffix + ".ai", FileMode.Create, FileAccess.Write);
             formatter.Serialize(stream, AI);
             stream.Close();
         }
-
-        /// <summary>
-        /// Setups many matches between a given AI and the random agent
-        /// </summary>
+        
         static public void AIPlayWithRandom() {
             Console.Write("Ingrese el nombre del archivo: ");
             string name = Console.ReadLine();
-            NeuralNetwork IA = LoadAI(name);
+            Cerebellum IA = LoadAI(name);
             Random r = new Random();
             ConnectFour connectFour;
             bool playing;
-            int games = 1000, turn;
+            int games = 10000, turn;
             int IAWins = 0, randomWins = 0, ties = 0, IAInvalidMovements = 0;
             while (games > 0) {
-                turn = games / 501;
+                turn = games / 5001;
                 playing = true;
                 connectFour = new ConnectFour();
                 while (playing) {
@@ -315,15 +318,10 @@ namespace Connect4 {
             Console.WriteLine($"Derrottas: {randomWins}");
             Console.WriteLine($"Invalidos: {IAInvalidMovements}");
             Console.WriteLine($"Empates: {ties}");
+            //Console.WriteLine($"En total se jugaron {IAWins + randomWins + IAInvalidMovements + ties} partidas");
         }
 
-        /// <summary>
-        /// Utility to play a move using the IA for a given board
-        /// </summary>
-        /// <param name="AI"></param>
-        /// <param name="connectFour"></param>
-        /// <returns></returns>
-        static public bool PlayMove(NeuralNetwork AI, ConnectFour connectFour) {
+        static public bool PlayMove(Cerebellum AI, ConnectFour connectFour) {
             double bestValue = double.MinValue;
             ConnectFour bestBoard = null;
             foreach (ConnectFour board in connectFour.GetPossibleBoards()) {
@@ -334,12 +332,13 @@ namespace Connect4 {
                 }
             }
             return connectFour.PlayOn(bestBoard.lastMovement);
+            /*double[] results = AI.ComputeOutputs(ttt.GetBoardParameters());
+            int playIndex = Cerebrum.ResultIndex(results);
+            return ttt.PlayOn(playIndex / 3, playIndex % 3, false);*/
         }
 
-        /// <summary>
-        /// Setups a match between two users
-        /// </summary>
-        static public void PlayConnectFour() {
+        static public void PlayConnectFour()
+        {
             Console.WriteLine("White on blue.");
             ConnectFour connectFour = new ConnectFour();
             connectFour.PrintBoard();
@@ -347,21 +346,25 @@ namespace Connect4 {
             bool playing = true;
             int column, turn;
             bool invalidColumn;
-            while (playing) {
+            while (playing)
+            {
                 turn = connectFour.turn;
                 Console.WriteLine(turn == -1 ? "Le toca jugar al jugador 1 ('R')" : "Le toca jugar al jugador 2 ('Y')");
-                do {
+                do
+                {
                     invalidColumn = true;
-                    do {
+                    do
+                    {
                         Console.Write("Ingrese la columna: ");
                         column = int.Parse(Console.ReadLine());
                         if (column >= 1 && column <= 7)
                             invalidColumn = false;
                     } while (invalidColumn);
-                } while (!connectFour.PlayOn(column - 1));
+                } while (!connectFour.PlayOn(column-1));
                 connectFour.PrintBoard();
-                Console.WriteLine("Estado tablero: " + connectFour.GetState());
-                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING) {
+                Console.WriteLine("Estado tablero: "+connectFour.GetState());
+                if (connectFour.GetState() != ConnectFour.BoardState.PLAYING)
+                {
                     if (connectFour.GetState() == ConnectFour.BoardState.WIN_RED)
                         Console.WriteLine("Red wins!!!!");
                     else if (connectFour.GetState() == ConnectFour.BoardState.WIN_YELLOW)
@@ -371,6 +374,19 @@ namespace Connect4 {
                     Console.ReadLine();
                     Environment.Exit(0);
                 }
+                /*
+                Console.Write("Obtener tableros posibles: ");
+                if (Console.ReadLine() == "si")
+                {
+                    List<ConnectFour> boards = new List<ConnectFour>();
+                    boards = connectFour.GetPossibleBoards();
+                    foreach (ConnectFour board in boards)
+                    {
+                        Console.WriteLine("Tablero: ");
+                        board.PrintBoard();
+                    }
+                    Console.WriteLine(boards.Count);
+                }*/      
             }
         }
     }

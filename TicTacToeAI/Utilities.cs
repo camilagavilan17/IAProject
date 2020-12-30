@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Connect4 {
     static class Utilities {
         private static Random rng = new Random();
 
-        /// <summary>
-        /// Shuffles a generic list
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="list"></param>
         public static void Shuffle<T>(this IList<T> list) {
             int n = list.Count;
             while (n > 1) {
